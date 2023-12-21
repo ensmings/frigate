@@ -20,6 +20,7 @@ import {
 import HistoryFilterPopover from "@/components/filter/HistoryFilterPopover";
 import useApiFilter from "@/hooks/use-api-filter";
 import HistoryCardView from "@/views/history/HistoryCardView";
+import HistoryTimelineView from "@/views/history/HistoryTimelineView";
 
 const API_LIMIT = 200;
 
@@ -141,10 +142,12 @@ function History() {
     <>
       <div className="flex justify-between">
         <Heading as="h2">History</Heading>
-        <HistoryFilterPopover
-          filter={historyFilter}
-          onUpdateFilter={(filter) => setHistoryFilter(filter)}
-        />
+        {!playback && (
+          <HistoryFilterPopover
+            filter={historyFilter}
+            onUpdateFilter={(filter) => setHistoryFilter(filter)}
+          />
+        )}
       </div>
 
       <AlertDialog
@@ -173,23 +176,26 @@ function History() {
       </AlertDialog>
 
       <TimelinePlayerCard
-        timeline={playback}
+        timeline={undefined}
         onDismiss={() => setPlayback(undefined)}
       />
 
       <>
-        <HistoryCardView
-          timelineCards={timelineCards}
-          allPreviews={allPreviews}
-          isMobileView={shouldAutoPlay}
-          isValidating={isValidating}
-          isDone={isDone}
-          onNextPage={() => {
-            setSize(size + 1);
-          }}
-          onDelete={onDelete}
-          onItemSelected={(card) => setPlayback(card)}
-        />
+        {playback == undefined && (
+          <HistoryCardView
+            timelineCards={timelineCards}
+            allPreviews={allPreviews}
+            isMobileView={shouldAutoPlay}
+            isValidating={isValidating}
+            isDone={isDone}
+            onNextPage={() => {
+              setSize(size + 1);
+            }}
+            onDelete={onDelete}
+            onItemSelected={(card) => setPlayback(card)}
+          />
+        )}
+        {playback != undefined && <HistoryTimelineView card={playback} />}
       </>
     </>
   );
