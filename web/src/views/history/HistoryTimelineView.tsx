@@ -2,6 +2,7 @@ import { useApiHost } from "@/api";
 import TimelineEventOverlay from "@/components/overlay/TimelineDataOverlay";
 import VideoPlayer from "@/components/player/VideoPlayer";
 import ActivityScrubber from "@/components/scrubber/ActivityScrubber";
+import ActivityIndicator from "@/components/ui/activity-indicator";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { getTimelineItemDescription } from "@/utils/timelineUtil";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -81,7 +82,7 @@ export default function HistoryTimelineView({
     }/${date.getDate()}/${date.getHours()}/${
       playback.camera
     }/${timezone.replaceAll("/", ",")}/master.m3u8`;
-  }, [playback, playbackTimes]);
+  }, [playbackTimes]);
 
   const onSelectItem = useCallback(
     (data: { items: number[] }) => {
@@ -94,12 +95,9 @@ export default function HistoryTimelineView({
         );
         playerRef.current?.pause();
 
-        if (!recordings) {
-          return 0;
-        }
-
         let seekSeconds = 0;
-        recordings.every((segment) => {
+        console.log("recordings are " + recordings?.length);
+        (recordings || []).every((segment) => {
           // if the next segment is past the desired time, stop calculating
           if (segment.start_time > selected) {
             return false;
@@ -119,8 +117,12 @@ export default function HistoryTimelineView({
         playerRef.current?.currentTime(seekSeconds);
       }
     },
-    [annotationOffset, recordings, playback, playerRef]
+    [annotationOffset, recordings, playerRef]
   );
+
+  if (!config || !recordings) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <>
@@ -189,6 +191,7 @@ export default function HistoryTimelineView({
             />
           </div>
           <ActivityScrubber
+            // @ts-ignore
             items={timelineItemsToScrubber(playback.timelineItems)}
             timeBars={[{ time: new Date(timelineTime * 1000), id: "playback" }]}
             options={{
