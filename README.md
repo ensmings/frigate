@@ -44,3 +44,4 @@ Also comes with a builtin UI:
 </div>
 
 ![Events](docs/static/img/events-ui.png)
+
